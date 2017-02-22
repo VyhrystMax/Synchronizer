@@ -1,0 +1,5 @@
+.idea/
+vendor/
+app/adsapi_php.ini
+app/settings.php
+app/synchronizer.log

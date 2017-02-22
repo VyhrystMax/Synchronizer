@@ -1,0 +1,12 @@
+{
+    "require": {
+        "googleads/googleads-php-lib": "^25.1",
+        "simplon/mysql": "*",
+        "monolog/monolog": "^1.22"
+    },
+    "autoload": {
+        "psr-4": {
+            "Synchronizer\\": "app/Synchronizer"
+        }
+    }
+}
