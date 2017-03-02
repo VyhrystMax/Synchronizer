@@ -41,7 +41,7 @@ use Google\AdsApi\AdWords\v201609\cm\AdGroupAdOperation;
 
 class AdWordsAPI {
 
-    use Log;
+	use Log;
 
 	protected $session;
 
@@ -55,22 +55,22 @@ class AdWordsAPI {
 
 	private function getSession($pathToIni)
 	{
-	    try {
-            $session = (new AdWordsSessionBuilder())
-                ->fromFile($pathToIni)
-                ->withOAuth2Credential(
-                    (new OAuth2TokenBuilder())
-                        ->fromFile($pathToIni)
-                        ->build()
-                )
-                ->build();
+		try {
+		    $session = (new AdWordsSessionBuilder())
+			->fromFile($pathToIni)
+			->withOAuth2Credential(
+			    (new OAuth2TokenBuilder())
+				->fromFile($pathToIni)
+				->build()
+			)
+			->build();
 
-            return $session;
-        } catch (\Exception $exception) {
-            $this->log('AdWords API: Unable to get session token. Message: '.
-                $exception->getMessage(), 'error');
-            exit;
-        }
+		    return $session;
+		} catch (\Exception $exception) {
+		    $this->log('AdWords API: Unable to get session token. Message: '.
+			$exception->getMessage(), 'error');
+		    exit;
+		}
 	}
 
 	public function getKeywords($adGroupIds)
@@ -184,10 +184,10 @@ class AdWordsAPI {
 	}
 
 	private function validate($array, $key)
-    {
-        return array_key_exists($key, $array) &&
-               !empty($array[$key]);
-    }
+	{
+		return array_key_exists($key, $array) &&
+		       !empty($array[$key]);
+	}
 
 	public function operate($data)
 	{
