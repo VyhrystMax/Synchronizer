@@ -49,10 +49,9 @@ class Synchronizer
         if ( ! is_array($rowsTocreate) || empty($rowsTocreate)) {
             return false;
         }
+        
         $mapped = $this->mapper->mapGroupsToCreate($rowsTocreate);
-
         $result = $this->adWords->createAdGroups($mapped);
-
         $toDB = $this->processor->extractAdGroupsAfterCreate($result);
 
         if ($toDB === null) {
