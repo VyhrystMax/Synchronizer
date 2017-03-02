@@ -17,7 +17,6 @@ use Google\AdsApi\AdWords\v201609\cm\ExpandedTextAd;
 use Google\AdsApi\AdWords\v201609\cm\Keyword;
 use Google\AdsApi\AdWords\v201609\cm\AdGroupAdStatus;
 
-
 class DataMapper
 {
 	public function mapToRemove($data)
