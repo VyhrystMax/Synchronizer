@@ -228,7 +228,7 @@ class DataMapper
 	private function extractCampaign($value)
 	{
 		$campaign = new Campaign();
-
+ 
 		return $campaign;
 	}
 }
