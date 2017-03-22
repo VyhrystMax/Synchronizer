@@ -15,18 +15,42 @@ use Synchronizer\Classes\DataMapper;
 use Synchronizer\Classes\DataProcessor;
 use Synchronizer\Classes\Log;
 
+/**
+ * Class Synchronizer
+ * @package Synchronizer
+ */
 class Synchronizer
 {
     use Log;
 
+    /**
+     * @var AdWordsAPI
+     */
     private $adWords;
 
+    /**
+     * @var Database
+     */
     private $database;
 
+    /**
+     * @var DataMapper
+     */
     private $mapper;
 
+    /**
+     * @var DataProcessor
+     */
     private $processor;
 
+    /**
+     * Synchronizer constructor.
+     *
+     * @param AdWordsAPI $adWords
+     * @param Database $database
+     * @param DataMapper $mapper
+     * @param DataProcessor $processor
+     */
     public function __construct(AdWordsAPI $adWords, Database $database, DataMapper $mapper, DataProcessor $processor)
     {
         $this->adWords   = $adWords;
@@ -35,6 +59,9 @@ class Synchronizer
         $this->processor = $processor;
     }
 
+    /**
+     *
+     */
     public function synchronize()
     {
         $this->createAdGroups();
@@ -42,6 +69,9 @@ class Synchronizer
         $this->doRemove();
     }
 
+    /**
+     * @return bool|null
+     */
     private function createAdGroups()
     {
         $rowsTocreate = $this->database->getAdGroupsForCreate();
@@ -49,10 +79,10 @@ class Synchronizer
         if ( ! is_array($rowsTocreate) || empty($rowsTocreate)) {
             return false;
         }
-        
+
         $mapped = $this->mapper->mapGroupsToCreate($rowsTocreate);
         $result = $this->adWords->createAdGroups($mapped);
-        $toDB = $this->processor->extractAdGroupsAfterCreate($result);
+        $toDB   = $this->processor->extractAdGroupsAfterCreate($result);
 
         if ($toDB === null) {
             return null;
@@ -61,6 +91,9 @@ class Synchronizer
         $this->database->setAdGroupsToDB($toDB);
     }
 
+    /**
+     * @return bool
+     */
     private function doUpdate()
     {
         $rowsToUpdate = $this->database->getData();
@@ -87,6 +120,10 @@ class Synchronizer
         }
     }
 
+    /**
+     * @param $toUpdate
+     * @param $result
+     */
     private function updateDBafterSync($toUpdate, $result)
     {
         foreach ($toUpdate as $id => $item) {
@@ -104,6 +141,9 @@ class Synchronizer
         }
     }
 
+    /**
+     * @return bool
+     */
     private function doRemove()
     {
         $rowsToDelete = $this->database->getDataToRemove();
@@ -119,6 +159,9 @@ class Synchronizer
         $this->removeFromDB($result);
     }
 
+    /**
+     * @param $result
+     */
     private function removeFromDB($result)
     {
         foreach ($result as $id) {

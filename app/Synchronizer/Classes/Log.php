@@ -11,8 +11,16 @@ namespace Synchronizer\Classes;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
+/**
+ * Class Log
+ * @package Synchronizer\Classes
+ */
 trait Log
 {
+    /**
+     * @param $message
+     * @param $type
+     */
     public function log($message, $type)
     {
         $logger = new Logger('Synchronizer');

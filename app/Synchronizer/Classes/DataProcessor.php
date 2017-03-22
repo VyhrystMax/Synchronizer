@@ -13,70 +13,96 @@ use Google\AdsApi\AdWords\v201609\cm\AdGroupOperation;
 use Google\AdsApi\AdWords\v201609\cm\BiddableAdGroupCriterion;
 use Google\AdsApi\AdWords\v201609\cm\Keyword;
 
+/**
+ * Class DataProcessor
+ * @package Synchronizer\Classes
+ */
 class DataProcessor
 {
     use Log;
 
-	public function processKeywords($data)
-	{
-		foreach ($data as $adGroupId => $adGroupData) {
-		    if (array_key_exists('ProductionKeywords', $adGroupData) &&
-                !empty($adGroupData['ProductionKeywords'])) {
-		        $prod_kw = $adGroupData['ProductionKeywords'];
+    /**
+     * @param $data
+     *
+     * @return mixed
+     */
+    public function processKeywords($data)
+    {
+        foreach ($data as $adGroupId => $adGroupData) {
+            if (array_key_exists('ProductionKeywords', $adGroupData) &&
+                ! empty($adGroupData['ProductionKeywords'])
+            ) {
+                $prod_kw = $adGroupData['ProductionKeywords'];
             } else {
-		        $prod_kw = [];
+                $prod_kw = [];
             }
 
-			list(
-				$data[$adGroupId]['KeywordsToUpdate'],
-				$data[$adGroupId]['KeywordsToCreate'],
-				$data[$adGroupId]['KeywordsToDelete']) =
-			$this->extractKeywords(
-				$adGroupData['LocalKeywords'],
-                $prod_kw
-			);
+            list(
+                $data[$adGroupId]['KeywordsToUpdate'],
+                $data[$adGroupId]['KeywordsToCreate'],
+                $data[$adGroupId]['KeywordsToDelete']) =
+                $this->extractKeywords(
+                    $adGroupData['LocalKeywords'],
+                    $prod_kw
+                );
 
-			unset($data[$adGroupId]['LocalKeywords']);
-			unset($data[$adGroupId]['ProductionKeywords']);
-		}
+            unset($data[$adGroupId]['LocalKeywords']);
+            unset($data[$adGroupId]['ProductionKeywords']);
+        }
 
-		return $data;
-	}
+        return $data;
+    }
 
-	public function mergeProductionKeywords($data)
-	{
-		foreach ($data['ProductionKeywords'] as $criterion) {
-			$data[$criterion->getAdGroupId()]['ProductionKeywords'][] = $criterion;
-		}
+    /**
+     * @param $data
+     *
+     * @return mixed
+     */
+    public function mergeProductionKeywords($data)
+    {
+        foreach ($data['ProductionKeywords'] as $criterion) {
+            $data[$criterion->getAdGroupId()]['ProductionKeywords'][] = $criterion;
+        }
 
-		unset($data['ProductionKeywords']);
+        unset($data['ProductionKeywords']);
 
-		return $data;
-	}
+        return $data;
+    }
 
-	private function extractKeywords($toCreate, $production)
-	{
-		$toUpdate = [];
-		$toDelete = [];
+    /**
+     * @param $toCreate
+     * @param $production
+     *
+     * @return array
+     */
+    private function extractKeywords($toCreate, $production)
+    {
+        $toUpdate = [];
+        $toDelete = [];
 
-		foreach ($production as $key => $criterion) {
-			if (array_key_exists($key, $toCreate)) {
-				$toUpdate[] = $criterion->setCriterion(
-					$criterion
-						->getCriterion()
-						->setText($toCreate[$key]->getText())
-				);
+        foreach ($production as $key => $criterion) {
+            if (array_key_exists($key, $toCreate)) {
+                $toUpdate[] = $criterion->setCriterion(
+                    $criterion
+                        ->getCriterion()
+                        ->setText($toCreate[$key]->getText())
+                );
 
-				unset($toCreate[$key]);
-			} else {
-				$toDelete[] = $criterion;
-			}
-		}
+                unset($toCreate[$key]);
+            } else {
+                $toDelete[] = $criterion;
+            }
+        }
 
-		return array($toUpdate, $toCreate, $toDelete);
-	}
+        return array($toUpdate, $toCreate, $toDelete);
+    }
 
 
+    /**
+     * @param $response
+     *
+     * @return array
+     */
     public function processResponse($response)
     {
         $output = [];
@@ -123,9 +149,15 @@ class DataProcessor
             }
 
         }
+
         return $output;
     }
 
+    /**
+     * @param $response
+     *
+     * @return array|null
+     */
     public function processResponseDelete($response)
     {
         $ids = [];
@@ -136,6 +168,7 @@ class DataProcessor
             } else {
                 $this->log(str_replace("\n", ' ', 'Something went wrong during ad groups deleting!
                 Reason: Incorrect API response.'), 'error');
+
                 return null;
             }
         }
@@ -146,44 +179,64 @@ class DataProcessor
         return $ids;
     }
 
+    /**
+     * @param $element
+     * @param $key
+     * @param bool $notEmpty
+     *
+     * @return bool
+     */
     private function validateElement($element, $key, $notEmpty = false)
     {
         $result = array_key_exists($key, $element) &&
                   $element[$key] !== null;
 
-        if (!$notEmpty)
+        if ( ! $notEmpty) {
             return $result;
-        else
-            return $result && !empty($element[$key]);
+        } else {
+            return $result && ! empty($element[$key]);
+        }
     }
 
+    /**
+     * @param $keywords
+     *
+     * @return array
+     */
     public function extractKeywordIds($keywords)
     {
         $ids = [];
 
         foreach ($keywords as $keyword) {
-            if ($keyword instanceof BiddableAdGroupCriterion)
+            if ($keyword instanceof BiddableAdGroupCriterion) {
                 $ids[] = $keyword->getCriterion()->getId();
-            else
+            } else {
                 $ids[] = $keyword->getId();
+            }
         }
 
         return $ids;
     }
 
+    /**
+     * @param $groups
+     *
+     * @return array|null
+     */
     public function extractAdGroupsAfterCreate($groups)
     {
         $result = [];
 
         if (empty($groups)) {
             $this->log('Something went wrong during Ad Groups creation', 'error');
+
             return null;
         }
 
         foreach ($groups as $id => $adGroup) {
-            $group['adw_camp_id'] = $adGroup[0]->getCampaignId();
+            $group['adw_camp_id']  = $adGroup[0]->getCampaignId();
             $group['adw_group_id'] = $adGroup[0]->getId();
-            $group['name'] = $adGroup[0]->getName();
+            $group['name']         = $adGroup[0]->getName();
 
             $result[$id] = $group;
         }
